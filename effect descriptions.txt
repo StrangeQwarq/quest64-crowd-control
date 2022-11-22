@@ -1,0 +1,69 @@
+10  Heals for between 10% and 100% HP in increments of 10%. It can't go above Brian's maximum health.
+10  Hurts for between 10% and 100% HP in increments of 10%. If his HP falls to 0, he won't die until he takes another hit.
+10  Recovers between 10% and 100% MP in increments of 10%. It can't go above Brian's maximum MP.
+10  Drains between 10% and 100% MP in increments of 10%.
+Gives one spirit (level) of a particular element.
+50  Gives one fire spirit.
+50  Gives one earth spirit.
+50  Gives one water spirit.
+50  Gives one wind spirit.
+Removes one spirit (level) from a particular element. It can't go below 1.
+60  Removes one fire spirit.
+60  Removes one earth spirit.
+60  Removes one water spirit.
+60  Removes one wind spirit.
+Prevents spells of a particular element from being used.
+100 Prevent fire spells from being cast. (60 seconds)
+100 Prevent earth spells from being cast. (60 seconds)
+100 Prevent water spells from being cast. (60 seconds)
+100 Prevent wind spells from being cast. (60 seconds)
+Gives Brian an item.
+200 Gives a Spirit Light. It restores all HP.
+80  Gives a loaf of Fresh Bread. It restores 50 HP.
+120 Gives a loaf of Honey Bread. It restores 100 HP.
+150 Gives a Healing Potion. It restores 150 HP.
+200 Gives a Dragon's Potion. It restores all MP.
+50  Gives a Dew Drop. It restores 10 MP.
+100 Gives some Mint Leaves. They restore 20 MP.
+150 Gives a Heroes Drink. It restores 50 MP.
+100 Gives a Silent Flute. It freezes enemies.
+100 Gives Celine's Bell. It freezes enemies.
+50  Gives a Replica. It instantly escapes a fight.
+100 Gives Giant's Shoes. They increase movement area.
+80  Gives a Silver Amulet. It increases defense.
+100 Pumps Brian full of steroids, greatly increasing his size. (60 seconds)
+100 Fires the shrink ray, making Brian very small. (60 seconds)
+100 Widens the field of view. (60 seconds)
+100 Narrows the field of view. (60 seconds)
+200 Flips the camera vertically and effectively inverts movement controls. (60 seconds)
+100 Casting spells will be free. (60 seconds)
+100 Spells have double their normal cost. (60 seconds)
+300 Maximimizes the chance to get random battles. Good luck walking more than 3 steps in a row. (60 seconds)
+150 Minimizes the chance to get a random battle. Battles are still possible, but very unlikely. (60 seconds)
+300 Fully heals a damaged enemy. If the enemy is a boss, they instead heal for only 25% of their maximum HP.
+Applies a status effect to Brian during battle.
+50  Gives the Vampire Touch effect. Brian is healed when he bonks an enemy with his staff. (3 rounds)
+50  Gives the Power Staff effect. Staff attacks hit harder. (3 rounds)
+200 Gives the Freeze effect. Brian is frozen to the ground and can't move. (3 rounds)
+50  Gives the Evasion effect. Raises Brian's agility, which increases the chance for enemy attacks to miss. (3 rounds)
+200 Gives the Silence effect. Brian can't cast any spells. (3 rounds)
+50  Gives the Defense Up effect. Reduces damage taken. (3 rounds)
+100 Gives the Magic Barrier effect. Brian is protected from all magic damage. (3 rounds)
+Changes the current background music. The music will be locked in for 60 seconds. After that, it will continue until the music would normally change.
+200 Hides the HUD, which shows Brian's HP, MP and spirits. (60 seconds)
+100 Changes the colors on Brian's cloak. The colors will stay until someone chooses a different option.
+100 Increases Brian's movement area in battle. (60 seconds)
+100 Reduces Brian's movement area in battle. (60 seconds)
+100 Hides the compass when outside of battle. Don't get lost! (60 seconds)
+Randomizes which spells are cast. Only spells Brian already knows can be chosen.
+200 When Brian casts a spell, he'll always cast a random fire spell he knows. (30 seconds)
+200 When Brian casts a spell, he'll always cast a random earth spell he knows. (30 seconds)
+200 When Brian casts a spell, he'll always cast a random water spell he knows. (30 seconds)
+200 When Brian casts a spell, he'll always cast a random wind spell he knows. (30 seconds)
+250 When Brian casts a spell, he'll always cast a random spell he knows of any element. (30 seconds)
+
+
+
+
+
+
