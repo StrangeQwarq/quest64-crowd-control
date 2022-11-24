@@ -66,7 +66,7 @@ public class Quest64 : N64EffectPack
 
     private const ushort LOCKED_ELEMENT_LEVEL_REQ = 0x63;
    
-    private ushort lastCurrentHP = 0;
+    // private ushort lastCurrentHP = 0;
     private ushort lastCurrentMP = 9999;
     private ushort previousSpellTimer = 0;
 
@@ -178,7 +178,7 @@ public class Quest64 : N64EffectPack
         {"vampire", ("Vampire Touch", 0x2, 0x8007bb3b, 0, 0, "statup")},
         {"powerstaf", ("Power Staff", 0x4, 0x8007bb3c, 0x8007bb4a, 3, "statup")},
         {"freeze", ("Freeze", 0x8, 0x8007bb3d, 0, 0, "iceknife")},
-        {"evade", ("Evasion", 0x20, 0x8007bb3c, 0x8007bb4d, 7, "statup")},
+        {"evade", ("Evasion", 0x20, 0x8007bb3f/*0x8007bb3c*/, 0x8007bb4d, 7, "statup")},
         {"silence", ("Silence", 0x40, 0x8007bb40, 0x8007bb50, 0xb, "silence")},
         {"defup", ("Def Up", 0x400, 0x8007bb44, 0x8007bb4c, 5, "statup")},
         {"barrier", ("Magic Barrier", 0x100, 0x8007bb42, 0, 0, "magicbarrier")},
@@ -656,7 +656,10 @@ public class Quest64 : N64EffectPack
 
                 Connector.Read16(ADDR_BRIAN_STATUS, out ushort currentStatus);
                 TryEffect(request,
-                    () => IsInBattle() && (status.name != "Freeze" || !IsBossFight()) && Connector.Read8(status.durationAddress, out byte duration) && (duration == 0 || duration > 0x7f),
+                    () => IsInBattle() 
+                          && (status.name != "Freeze" || !IsBossFight()) 
+                          && Connector.Read16(ADDR_BRIAN_STATUS, out ushort currentStatusBitfield) 
+                          && ((currentStatusBitfield & status.statusBit) == 0),
                     () =>
                     {
                         ushort newStatus = (ushort)(currentStatus | status.statusBit);
@@ -777,6 +780,8 @@ public class Quest64 : N64EffectPack
                     TimeSpan.FromSeconds(1),
                     () =>
                     {
+                        // Check the current MP frequently. If there was a negative change since the last
+                        // check, double the difference and write the total back
                         bool result = Connector.Read16(ADDR_CURRENT_MP, out ushort currentMP);
                         if (currentMP < lastCurrentMP)
                         {
@@ -846,6 +851,8 @@ public class Quest64 : N64EffectPack
                     () => !IsInBattle() && Connector.Read32(ADDR_COMPASS_TEXTURE, out uint textureDataAddress) && textureDataAddress == COMPASS_SHOW,
                     () =>
                     {
+                        // This is an extremely hacky way to hide the compass. It basically just offsets the texture
+                        // used to draw it such that a blank area happens to be displayed. This really needs to be improved
                         bool result = Connector.Write32(ADDR_COMPASS_TEXTURE, COMPASS_HIDE);
                         if (result)
                             Connector.SendMessage($"{request.DisplayViewer} took the compass away for {effectDurations[code].duration} seconds");
@@ -874,15 +881,15 @@ public class Quest64 : N64EffectPack
                     () =>
                     {
                         bool result = Connector.Read16(ADDR_SPELL_TIMER, out ushort currentSpellTimer);
+                        // Timer was counting down but has ended. Unlock spell id
                         if (previousSpellTimer > 0 && currentSpellTimer == 0)
                         {
-                            // Connector.SendMessage("countdown finished");
                             result = result && Connector.Unfreeze(ADDR_SPELL_ID);
                         }
+                        // Spell timer hadn't started before but is now counting down. Lock in a random spell
                         else if (previousSpellTimer == 0 && currentSpellTimer > 0)
                         {
                             var randomSpell = ChooseRandomSpell(codeParams[1]);
-                            // Connector.SendMessage($"countdown started - {randomSpell.name}");
                             result = result && Connector.Freeze16(ADDR_SPELL_ID, randomSpell.spellId);
                         }
 
@@ -1001,7 +1008,7 @@ public class Quest64 : N64EffectPack
         bool result = true;
         result = result && Connector.Read8(ADDR_ENEMY_COUNT, out enemyCount);
 
-        if (enemyCount <= 0 || enemyCount > 6)
+        if (enemyCount == 0 || enemyCount > 6)
             return -1;
 
         for (ushort i = 0; i < enemyCount; i++)
