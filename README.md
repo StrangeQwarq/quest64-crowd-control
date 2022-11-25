@@ -17,3 +17,6 @@ The available effects are listed [here](https://github.com/StrangeQwarq/quest64-
 
 ## Stability
 While there are currently no known crashing issues, Quest 64 is particularly sensitive to this sort of memory manipulation. I recommend making a save state periodically (every 20 minutes or so) just in case.
+
+## Thanks
+A huge thanks to everyone in the Quest 64 community discord server for helping get this pack to its current state. Special thanks to Mallos31 and Landmine36 for tons of info on memory locations and how the game works, and also BingChang for testing and pointing out potential crashes.
