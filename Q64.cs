@@ -172,16 +172,16 @@ public class Quest64 : N64EffectPack
         {"wind", ("Wind", 0x8007baa7, 0x800c1294)},
     };
 
-    private readonly Dictionary<string, (string name, ushort statusBit, ulong durationAddress, ulong iconAddress, byte iconValue, string sfx)> statusTypes =
+    private readonly Dictionary<string, (string name, ushort statusBit, ulong durationAddress, ulong iconAddress, byte iconValue, string sfx, uint price, string description)> statusTypes =
         new()
     {
-        {"vampire", ("Vampire Touch", 0x2, 0x8007bb3b, 0, 0, "statup")},
-        {"powerstaf", ("Power Staff", 0x4, 0x8007bb3c, 0x8007bb4a, 3, "statup")},
-        {"freeze", ("Freeze", 0x8, 0x8007bb3d, 0, 0, "iceknife")},
-        {"evade", ("Evasion", 0x20, 0x8007bb3f/*0x8007bb3c*/, 0x8007bb4d, 7, "statup")},
-        {"silence", ("Silence", 0x40, 0x8007bb40, 0x8007bb50, 0xb, "silence")},
-        {"defup", ("Def Up", 0x400, 0x8007bb44, 0x8007bb4c, 5, "statup")},
-        {"barrier", ("Magic Barrier", 0x100, 0x8007bb42, 0, 0, "magicbarrier")},
+        {"vampire", ("Vampire Touch", 0x2, 0x8007bb3b, 0, 0, "statup", 50,  "Gives the Vampire Touch effect. Brian is healed when he bonks an enemy with his staff. (3 rounds)")},
+        {"powerstaf", ("Power Staff", 0x4, 0x8007bb3c, 0x8007bb4a, 3, "statup", 50,  "Gives the Power Staff effect. Staff attacks hit harder. (3 rounds)")},
+        {"freeze", ("Freeze", 0x8, 0x8007bb3d, 0, 0, "iceknife", 200, "Gives the Freeze effect. Brian is frozen to the ground and can't move. (3 rounds)")},
+        {"evade", ("Evasion", 0x20, 0x8007bb3f/*0x8007bb3c*/, 0x8007bb4d, 7, "statup", 50,  "Gives the Evasion effect. Raises Brian's agility, which increases the chance for enemy attacks to miss. (3 rounds)")},
+        {"silence", ("Silence", 0x40, 0x8007bb40, 0x8007bb50, 0xb, "silence", 200, "Gives the Silence effect. Brian can't cast any spells. (3 rounds)")},
+        {"defup", ("Def Up", 0x400, 0x8007bb44, 0x8007bb4c, 5, "statup", 50,  "Gives the Defense Up effect. Reduces damage taken. (3 rounds)")},
+        {"barrier", ("Magic Barrier", 0x100, 0x8007bb42, 0, 0, "magicbarrier", 150, "Gives the Magic Barrier effect. Brian is protected from all magic damage. (3 rounds)")},
     };
 
     private readonly Dictionary<string, (string name, ulong[] colors)> cloakColors = 
@@ -201,22 +201,22 @@ public class Quest64 : N64EffectPack
 
     protected Dictionary<string, Func<bool>> bidWarActions;
         
-    private readonly Dictionary<string, (string name, byte value)> items =
+    private readonly Dictionary<string, (string name, byte value, uint price, string description )> items =
         new()
     {
-        {"spiritlight", ("Spirit Light", 0x00)},
-        {"freshbread", ("Fresh Bread", 0x01)},
-        {"honeybread", ("Honey Bread", 0x02)},
-        {"healingpotion", ("Healing Potion", 0x03)},
-        {"dragonspotion", ("Dragon's Potion", 0x04)},
-        {"dewdrop", ("Dew Drop", 0x05)},
-        {"mintleaves", ("Mint Leaves", 0x06)},
-        {"heroesdrink", ("Heroes Drink", 0x07)},
-        {"silentflute", ("Silent Flute", 0x08)},
-        {"celinesbell", ("Celine's Bell", 0x09)},
-        {"replica", ("Replica", 0x0a)},
-        {"giantsshoes", ("Giant's Shoes", 0x0b)},
-        {"silveramulet", ("Silver Amulet", 0x0c)},
+        {"spiritlight", ("Spirit Light", 0x00, 200, "Gives a Spirit Light. It restores all HP.")},
+        {"freshbread", ("Fresh Bread", 0x01, 80, "Gives a loaf of Fresh Bread. It restores 50 HP.")},
+        {"honeybread", ("Honey Bread", 0x02, 120, "Gives a loaf of Honey Bread. It restores 100 HP.")},
+        {"healingpotion", ("Healing Potion", 0x03, 150, "Gives a Healing Potion. It restores 150 HP.")},
+        {"dragonspotion", ("Dragon's Potion", 0x04, 200, "Gives a Dragon's Potion. It restores all MP.")},
+        {"dewdrop", ("Dew Drop", 0x05, 50, "Gives a Dew Drop. It restores 10 MP.")},
+        {"mintleaves", ("Mint Leaves", 0x06, 100, "Gives some Mint Leaves. They restore 20 MP.")},
+        {"heroesdrink", ("Heroes Drink", 0x07, 150, "Gives a Heroes Drink. It restores 50 MP.")},
+        {"silentflute", ("Silent Flute", 0x08, 100, "Gives a Silent Flute. It freezes enemies.")},
+        {"celinesbell", ("Celine's Bell", 0x09, 100, "Gives Celine's Bell. It freezes enemies.")},
+        {"replica", ("Replica", 0x0a, 50, "Gives a Replica. It instantly escapes a fight.")},
+        {"giantsshoes", ("Giant's Shoes", 0x0b, 100, "Gives Giant's Shoes. They increase movement area.")},
+        {"silveramulet", ("Silver Amulet", 0x0c, 80, "Gives a Silver Amulet. It increases defense.")},
         // {"White Wings", 0x0D}
         // {"Yellow Wings", 0x0E}
         // {"Blue Wings", 0x0F}
@@ -316,52 +316,82 @@ public class Quest64 : N64EffectPack
         {
             List<Effect> effects = new List<Effect>
             {
-                new("Give HP", "hpplus", new[] {"hpquantity"}),
-                new("Take HP", "hpminus", new[] {"hpquantity"}),
-                new("Give MP", "mpplus", new[] {"mpquantity"}),
-                new("Take MP", "mpminus", new[] {"mpquantity"}),
-                new("Increase Agility", "agiplus", new[] {"agiquantity"}),
-                new("Decrease Agility", "agiminus", new[] {"agiquantity"}),
-                new("Increase Defense", "defplus", new[] {"defquantity"}),
-                new("Decrease Defense", "defminus", new[] {"defquantity"}),
-                new("Give Spirit", "givespirit", ItemKind.Folder),
-                new("Take Spirit", "takespirit", ItemKind.Folder),
-                new("Lock Element", "lockelement", ItemKind.Folder),
-                new("Give Item", "giveitem", ItemKind.Folder),
-                new("Big Brian", "bigbrian"),
-                new("Tiny Brian", "smallbrian"),
-                new("Wide View", "wideview"),
-                new("Narrow View", "narrowview"),
-                new("Flip Camera", "flipcamera"),
-                new("Cheap Spells", "cheapspells"),
-                new("Expensive Spells", "expensivespells"),
-                new("Max Encounter Rate", "maxencounter"),
-                new("Min Encounter Rate", "minencounter"),
-                new("Heal Enemy", "healenemy"),
-                new("Apply Status Effect", "statuseffect", ItemKind.Folder),
-                new("Change Music", "changemusic", ItemKind.Folder),
-                new("Hide HUD", "hidehud"),
-                new("Change Cloak Color", "cloakcolor", ItemKind.Folder),
-                new("Battle Movement Up", "moveup"),
-                new("Battle Movement Down", "movedown"),
-                new("Hide Compass", "hidecompass"),
-                new("Randomize Spells", "randomspell", ItemKind.Folder),
+                new("Give HP", "hpplus", new[] {"hpquantity"}) 
+                    {Price = 10,  Description = "Heals for between 10% and 100% HP in increments of 10%. It can't go above Brian's maximum health."},
+                new("Take HP", "hpminus", new[] {"hpquantity"}) 
+                    {Price = 10,  Description = "Hurts for between 10% and 100% HP in increments of 10%. If his HP falls to 0, he won't die until he takes another hit."},
+                new("Give MP", "mpplus", new[] {"mpquantity"}) 
+                    {Price = 10,  Description = "Recovers between 10% and 100% MP in increments of 10%. It can't go above Brian's maximum MP."},
+                new("Take MP", "mpminus", new[] {"mpquantity"}) 
+                    {Price = 10,  Description = "Drains between 10% and 100% MP in increments of 10%."},
+                new("Increase Agility", "agiplus", new[] {"agiquantity"}) 
+                    {Price = 10,  Description = "Increases Brian's agility by up to 5. It can't go above 512. Agility decreases the chance enemies will hit, increases the chance Brian will hit, determines turn order and determines how far Brian can move in battle."},
+                new("Decrease Agility", "agiminus", new[] {"agiquantity"}) 
+                    {Price = 20,  Description = "Decreases Brian's agility by up to 5. It can't go below 1. Agility decreases the chance enemies will hit, increases the chance Brian will hit, determines turn order and determines how far Brian can move in battle."},
+                new("Increase Defense", "defplus", new[] {"defquantity"}) 
+                    {Price = 10,  Description = "Increases Brian's defense by up to 5. It can't go above 512. Defense reduces the damage Brian takes."},
+                new("Decrease Defense", "defminus", new[] {"defquantity"}) 
+                    {Price = 20,  Description = "Decreases Brian's defense by up to 5. It can't go below 1. Defense reduces the damage Brian takes."},
+                new("Give Spirit", "givespirit", ItemKind.Folder) 
+                    {Description = "Gives one spirit (level) of a particular element."},
+                new("Take Spirit", "takespirit", ItemKind.Folder)
+                    {Description = "Removes one spirit (level) from a particular element. It can't go below 1."},
+                new("Lock Element", "lockelement", ItemKind.Folder)
+                    {Description = "Prevents spells of a particular element from being used."},
+                new("Give Item", "giveitem", ItemKind.Folder) 
+                    {Description = "Gives Brian an item."},
+                new("Big Brian", "bigbrian") 
+                    {Price = 100, Description = "Pumps Brian full of steroids, greatly increasing his size.", Duration = TimeSpan.FromSeconds(60)},
+                new("Tiny Brian", "smallbrian") 
+                    {Price = 100, Description = "Fires the shrink ray, making Brian very small.", Duration = TimeSpan.FromSeconds(60)},
+                new("Wide View", "wideview") 
+                    {Price = 100, Description = "Widens the field of view.", Duration = TimeSpan.FromSeconds(60)},
+                new("Narrow View", "narrowview") 
+                    {Price = 100, Description = "Narrows the field of view.", Duration = TimeSpan.FromSeconds(60)},
+                new("Flip Camera", "flipcamera") 
+                    {Price = 200, Description = "Flips the camera vertically and effectively inverts movement controls.", Duration = TimeSpan.FromSeconds(60)},
+                new("Cheap Spells", "cheapspells") 
+                    {Price = 100, Description = "Casting spells will be free.", Duration = TimeSpan.FromSeconds(60)},
+                new("Expensive Spells", "expensivespells") 
+                    {Price = 100, Description = "Spells have double their normal cost.", Duration = TimeSpan.FromSeconds(60)},
+                new("Max Encounter Rate", "maxencounter") 
+                    {Price = 300, Description = "Maximimizes the chance to get random battles. Good luck walking more than 3 steps in a row.", Duration = TimeSpan.FromSeconds(60)},
+                new("Min Encounter Rate", "minencounter") 
+                    {Price = 150, Description = "Minimizes the chance to get a random battle. Battles are still possible, but very unlikely.", Duration = TimeSpan.FromSeconds(60)},
+                new("Heal Enemy", "healenemy") 
+                    {Price = 300, Description = "Fully heals a damaged enemy. If the enemy is a boss, they instead heal for only 25% of their maximum HP."},
+                new("Apply Status Effect", "statuseffect", ItemKind.Folder) 
+                    {Description = "Applies a status effect to Brian during battle."},
+                new("Change Music", "changemusic", ItemKind.Folder) 
+                    {Price = 100, Description = "Changes the current background music. The music will be locked in for 60 seconds. After that, it will continue until the music would normally change.", Duration = TimeSpan.FromSeconds(60)},
+                new("Hide HUD", "hidehud") 
+                    {Price = 200, Description = "Hides the HUD, which shows Brian's HP, MP and spirits.", Duration = TimeSpan.FromSeconds(60)},
+                new("Change Cloak Color", "cloakcolor", ItemKind.Folder) 
+                    {Price = 100, Description = "Changes the colors on Brian's cloak. The colors will stay until someone chooses a different option."},
+                new("Battle Movement Up", "moveup") 
+                    {Price = 100, Description = "Increases Brian's movement area in battle.", Duration = TimeSpan.FromSeconds(60)},
+                new("Battle Movement Down", "movedown") 
+                    {Price = 100, Description = "Reduces Brian's movement area in battle.", Duration = TimeSpan.FromSeconds(60)},
+                new("Hide Compass", "hidecompass") 
+                    {Price = 100, Description = "Hides the compass when outside of battle. Don't get lost!", Duration = TimeSpan.FromSeconds(60)},
+                new("Randomize Spells", "randomspell", ItemKind.Folder) 
+                    {Description = "Randomizes which spells are cast. Only spells Brian already knows can be chosen.", Duration = TimeSpan.FromSeconds(60)},
                 
                 // Randomize spell options
-                new("Random Fire Spells", "randomspell_fire", "randomspell"),
-                new("Random Earth Spells", "randomspell_earth", "randomspell"),
-                new("Random Water Spells", "randomspell_water", "randomspell"),
-                new("Random Wind Spells", "randomspell_wind", "randomspell"),
-                new("Random Spells, Any Element", "randomspell_any", "randomspell"),
+                new("Random Fire Spells", "randomspell_fire", "randomspell") {Price = 200, Description = "When Brian casts a spell, he'll always cast a random fire spell he knows.", Duration = TimeSpan.FromSeconds(30)},
+                new("Random Earth Spells", "randomspell_earth", "randomspell") {Price = 200, Description = "When Brian casts a spell, he'll always cast a random earth spell he knows.", Duration = TimeSpan.FromSeconds(30)},
+                new("Random Water Spells", "randomspell_water", "randomspell") {Price = 200, Description = "When Brian casts a spell, he'll always cast a random water spell he knows.", Duration = TimeSpan.FromSeconds(30)},
+                new("Random Wind Spells", "randomspell_wind", "randomspell") {Price = 200, Description = "When Brian casts a spell, he'll always cast a random wind spell he knows.", Duration = TimeSpan.FromSeconds(30)},
+                new("Random Spells, Any Element", "randomspell_any", "randomspell") {Price = 250, Description = "When Brian casts a spell, he'll always cast a random spell he knows of any element.", Duration = TimeSpan.FromSeconds(30)},
             };
 
-            effects.AddRange(spiritTypes.Select(t => new Effect($"Add 1 {t.Value.name} spirit", $"givespirit_{t.Key}", "givespirit")));
-            effects.AddRange(spiritTypes.Select(t => new Effect($"Remove 1 {t.Value.name} spirit", $"takespirit_{t.Key}", "takespirit")));
-            effects.AddRange(spiritTypes.Select(t => new Effect($"Lock {t.Value.name} spells", $"lockelement_{t.Key}", "lockelement")));
-            effects.AddRange(items.Select(t => new Effect($"Give Item: {t.Value.name}", $"giveitem_{t.Key}", "giveitem")));
-            effects.AddRange(statusTypes.Select(t => new Effect($"Apply the {t.Value.name} effect", $"statuseffect_{t.Key}", "statuseffect")));
-            effects.AddRange(bgmTracks.Select(t => new Effect($"Play the {t.Value.name} music", $"changemusic_{t.Key}", "changemusic")));
-            effects.AddRange(cloakColors.Select(t => new Effect($"Change Brian's cloak to {t.Value.name}", $"cloakcolor_{t.Key}", "cloakcolor")));
+            effects.AddRange(spiritTypes.Select(t => new Effect($"Add 1 {t.Value.name} spirit", $"givespirit_{t.Key}", "givespirit") {Price = 50,  Description = $"Gives one {t.Value.name} spirit."}));
+            effects.AddRange(spiritTypes.Select(t => new Effect($"Remove 1 {t.Value.name} spirit", $"takespirit_{t.Key}", "takespirit") {Price = 60,  Description = $"Removes one {t.Value.name} spirit."}));
+            effects.AddRange(spiritTypes.Select(t => new Effect($"Lock {t.Value.name} spells", $"lockelement_{t.Key}", "lockelement") {Price = 100, Duration = TimeSpan.FromSeconds(60), Description = $"Prevent {t.Value.name} spells from being cast."}));
+            effects.AddRange(items.Select(t => new Effect($"Give Item: {t.Value.name}", $"giveitem_{t.Key}", "giveitem") {Price = t.Value.price, Description = t.Value.description}));
+            effects.AddRange(statusTypes.Select(t => new Effect($"Apply the {t.Value.name} effect", $"statuseffect_{t.Key}", "statuseffect") {Price = t.Value.price, Description = t.Value.description}));
+            effects.AddRange(bgmTracks.Select(t => new Effect($"Play the {t.Value.name} music", $"changemusic_{t.Key}", "changemusic") {Price = 100, Duration = TimeSpan.FromSeconds(60)}));
+            effects.AddRange(cloakColors.Select(t => new Effect($"Change Brian's cloak to {t.Value.name}", $"cloakcolor_{t.Key}", "cloakcolor") {Price = 100}));
             
             return effects;
         }
